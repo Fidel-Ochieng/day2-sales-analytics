@@ -1,0 +1,2 @@
+Pandas is used only in verify_with_pandas() to double-check the results.
+The core analysis (tasks 1-7) uses the python library only(pandas >=2.0)

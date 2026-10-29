@@ -1,0 +1,64 @@
+Rows read:  50
+column names: ['sale_id', 'sale_date', 'store', 'product', 'quantity', 'unit_price_kes', 'payment_method']
+Rows used: 46
+Rows skipped: 4
+Total revenue(KES): 1,310,812.00
+
+Revenue by product:
+HP 15 Laptop: KES 389,994.00
+Hisense 43in Smart TV: KES 272,993.00
+Lenovo Tab M10: KES 199,992.00
+Tecno Spark 20: KES 161,988.00
+Infinix Hot 40: KES 63,996.00
+Samsung Galaxy A15: KES 56,997.00
+JBL Go 3 Speaker: KES 49,491.00
+Anker Power Bank 20000: KES 38,691.00
+Xiaomi Redmi Buds: KES 25,592.00
+Oraimo FreePods: KES 19,593.00
+USB-C Charger 25W: KES 19,487.00
+Safaricom Neon Ray: KES 11,998.00
+
+Revenue by store:
+Kisumu Mega Plaza: KES 449,678.00
+Nairobi CBD: KES 331,085.00
+Westgate: KES 235,979.00
+Mombasa City Mall: KES 154,082.00
+Nakuru Westside: KES 139,988.00
+
+Revenue by payment method:
+M-Pesa: KES 738,568.00
+Cash: KES 304,375.00
+Card: KES 267,869.00
+
+Top 3 products:
+HP 15 Laptop: KES 389,994.00
+Hisense 43in Smart TV: KES 272,993.00
+Lenovo Tab M10: KES 199,992.00
+
+High-value transactions:
+S-3013 None Westgate Lenovo Tab M10  KES 99,996.00
+S-3017 None Kisumu Mega Plaza Hisense 43in Smart TV  KES 155,996.00
+S-3022 None Nairobi CBD HP 15 Laptop  KES 259,996.00
+S-3036 None Nakuru Westside Tecno Spark 20  KES 53,996.00
+S-3048 None Kisumu Mega Plaza HP 15 Laptop  KES 129,998.00
+
+High-value sales (KES 50,000 or more) per store:
+Kisumu Mega Plaza: 2
+Mombasa City Mall: 0
+Nairobi CBD: 1
+Nakuru Westside: 1
+Westgate: 1
+
+Transaction revenue statistics
+Mean: 28,495.91
+Median: 11,097.00
+Minimum: 1,499.00
+Maximum: 259,996.00
+
+Pandas verification:
+Rows used: MATCH (mine=46.00, pandas=46.00)
+Total revenue: MATCH (mine=1,310,812.00, pandas=1,310,812.00)
+Mean: MATCH (mine=28,495.91, pandas=28,495.91)
+Median: MATCH (mine=11,097.00, pandas=11,097.00)
+Minimum: MATCH (mine=1,499.00, pandas=1,499.00)
+Maximum: MATCH (mine=259,996.00, pandas=259,996.00)
