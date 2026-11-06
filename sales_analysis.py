@@ -38,8 +38,8 @@ def parse_number(value: str) -> float | None:
         cleaned = value.strip().upper().replace("," , "").replace("KES","").strip()
         if not cleaned:
             return None
-        return float(cleaned)
-    except(ValueError , AttributeError):
+        result = float(cleaned)
+    except (ValueError , AttributeError):
         return None 
     if not math.isfinite(result):
         return None
@@ -66,10 +66,11 @@ def convert_rows(rows: list[dict[str, str]]) -> tuple[list[dict], list[dict]]:
             skipped_rows.append({"sale_id": row.get("sale_id","unknown"),
                             "reason": reason})
             continue
-        row["Quantity"]= quantity
-        row["unit_price_kes"] = unit_price
-        row["revenue"] = quantity * unit_price
-        clean_rows.append(row)
+        clean_row = dict(row)
+        clean_row["quantity"] = quantity
+        clean_row["unit_price_kes"] = unit_price
+        clean_row["revenue"] = quantity * unit_price
+        clean_rows.append(clean_row)
     return clean_rows, skipped_rows
 
 
@@ -89,8 +90,7 @@ def revenue_by(rows: list[dict], field: str) -> dict[str, float]:
 
 def top_n(totals: dict[str, float], n: int = 3) -> list[tuple[str, float]]:
     """Return the n highest (key, value) pairs, highest first."""
-    return sorted(totals.items(), key = lambda item:
-    item[1], reverse = True)[:n]
+    return sorted(totals.items(), key = lambda item: (-item[1], item[0]))[:n]
 
 
 
@@ -155,9 +155,22 @@ def verify_with_pandas(path: Path, my_results: dict) -> None:
     }
     show("\nPandas verification:")
     for name, (mine, theirs) in checks.items():
-        status = "MATCH" if abs(mine - theirs) < 0.01 else "MISMATCH"
-        show(f"{name}: {status} (mine={mine:,.2f}, pandas={theirs:,.2f})")
-
+            status = "MATCH" if abs(mine - theirs) < 0.01 else "MISMATCH"
+            show(f"{name}: {status} (mine={mine:,.2f}, pandas={theirs:,.2f})")
+    
+    pandas_products = df.groupby("product")["revenue"].sum()
+    products_match = (
+            set(pandas_products.index) == set(my_results["product_totals"])
+            and all(abs(my_results["product_totals"][name] - amount) < 0.01
+                    for name, amount in pandas_products.items())
+    )
+    pandas_top = [name for name, _ in sorted(pandas_products.items(), key=lambda item: (-item[1], item[0]))[:3]]
+    my_top = [name for name, _ in my_results["top_products"]]
+    show("Revenue by product:", "MATCH" if products_match else "MISMATCH")
+    show("Top 3 products:", "MATCH" if pandas_top == my_top else "MISMATCH")
+    
+    
+    
 if __name__ == "__main__":
     raw_rows = read_sales()
     column_names = list(raw_rows[0].keys()) if raw_rows else[]
@@ -165,7 +178,6 @@ if __name__ == "__main__":
 
     total = total_revenue(clean_rows)
 
-    product_totals = revenue_by(clean_rows, "product")
     product_totals = revenue_by(clean_rows, "product")
     store_totals = revenue_by(clean_rows, "store")
     payment_totals = revenue_by(clean_rows, "payment_method")
@@ -188,7 +200,9 @@ if __name__ == "__main__":
     show("column names:", column_names)
     show("Rows used:", len(clean_rows))
     show("Rows skipped:", len(skipped_rows))
-
+    show("\nSkipped rows:")
+    for skipped in skipped_rows:
+        show(f"{skipped['sale_id']}: {skipped['reason']}")
     # from total_revenue()
     show("Total revenue(KES):",f"{total:,.2f}")
 
@@ -223,7 +237,7 @@ if __name__ == "__main__":
     for row in high_value_rows:
         show(
             row.get("sale_id"),
-            row.get("date"),
+            row.get("sale_date"),
             row.get("store"),
             row.get("product"),
             f" KES {row['revenue']:,.2f}"
@@ -245,9 +259,11 @@ if __name__ == "__main__":
         "median": middle_value,
         "minimum": low, 
         "maximum": high,
+        "product_totals": product_totals,
+        "top_products": top_products,
     })
-output_folder = Path("output")
-output_folder.mkdir(exist_ok=True)
-(output_folder / "sales_report.txt").write_text("\n".join(REPORT_LINES) + "\n", encoding="utf-8")
+    output_folder = Path("output")
+    output_folder.mkdir(exist_ok=True)
+    (output_folder / "sales_report.txt").write_text("\n".join(REPORT_LINES) + "\n", encoding="utf-8")
 
 
